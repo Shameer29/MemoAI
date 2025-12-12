@@ -15,8 +15,8 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
         console.log("WorkOS Login Config:", { clientId, redirectUri });
 
-        // Use the general SSO endpoint which handles both Enterprise and AuthKit flows
-        const workOsUrl = `https://api.workos.com/sso/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        // AuthKit (Hosted Login) requires the user_management endpoint
+        const workOsUrl = `https://api.workos.com/user_management/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         window.location.href = workOsUrl;
     };
 
