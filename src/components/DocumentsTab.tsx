@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, FileText, Search, Loader, Brain, Sparkles, Filter, X } from 'lucide-react';
+import { Upload, FileText, Search, Loader, Brain, Sparkles, Filter, X, Volume2 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL, getUserId } from '../types';
+import { playTextToSpeech } from '../audio';
 
 interface Doc {
     fileId: string;
@@ -307,8 +308,17 @@ export default function DocumentsTab() {
                                 {docQaHistory.length > 0 && (
                                     <div className="space-y-4">
                                         {docQaHistory.map((qa, idx) => (
-                                            <div key={idx} className="space-y-2">
-                                                <div className="text-xs font-medium text-gray-400 uppercase">{qa.q}</div>
+                                            <div key={idx} className="space-y-2 group">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="text-xs font-medium text-gray-400 uppercase">{qa.q}</div>
+                                                    <button
+                                                        onClick={() => playTextToSpeech(qa.a)}
+                                                        className="text-gray-500 hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        title="Read Aloud"
+                                                    >
+                                                        <Volume2 size={14} />
+                                                    </button>
+                                                </div>
                                                 <div className="bg-white/5 rounded-lg p-3 text-sm text-gray-200 leading-relaxed border border-white/5">{qa.a}</div>
                                             </div>
                                         ))}

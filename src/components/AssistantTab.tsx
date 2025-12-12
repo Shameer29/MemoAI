@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Sparkles } from 'lucide-react';
+import { Send, Sparkles, Volume2, VolumeX, Square } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL, getUserId } from '../types';
 import type { ChatMessage } from '../types';
+import { playTextToSpeech } from '../audio';
 
 export default function AssistantTab() {
     const [messages, setMessages] = useState<ChatMessage[]>([
@@ -11,7 +12,10 @@ export default function AssistantTab() {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [autoRead, setAutoRead] = useState(false);
+    const [playingIdx, setPlayingIdx] = useState<number | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -73,11 +77,47 @@ export default function AssistantTab() {
                 timestamp: new Date()
             };
             setMessages(prev => [...prev, aiMsg]);
+
+            if (autoRead) {
+                // Small delay to allow state update
+                setTimeout(() => handlePlayMessage(response.data.response, -1), 100);
+            }
         } catch (error) {
             console.error("Chat error", error);
             setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error connecting to my brain.", timestamp: new Date() }]);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handlePlayMessage = async (text: string, idx: number) => {
+        // Stop current if playing
+        if (currentAudioRef.current) {
+            currentAudioRef.current.pause();
+            currentAudioRef.current = null;
+        }
+
+        // If clicking the same message, just stop (toggle off)
+        if (playingIdx === idx) {
+            setPlayingIdx(null);
+            return;
+        }
+
+        setPlayingIdx(idx);
+        try {
+            const audio = await playTextToSpeech(text);
+            if (audio) {
+                currentAudioRef.current = audio;
+                audio.onended = () => {
+                    setPlayingIdx(null);
+                    currentAudioRef.current = null;
+                };
+            } else {
+                setPlayingIdx(null);
+            }
+        } catch (e) {
+            console.error(e);
+            setPlayingIdx(null);
         }
     };
 
@@ -118,6 +158,13 @@ _${data.wisdom}_
                     <Sparkles size={16} />
                     Daily Briefing
                 </button>
+                <button
+                    onClick={() => setAutoRead(!autoRead)}
+                    className={`flex items-center gap-2 px-3 py-2 text-sm font-medium border rounded-lg transition-colors ml-2 ${autoRead ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' : 'bg-transparent text-gray-400 border-gray-700 hover:bg-white/5'}`}
+                    title={autoRead ? "Disable Text-to-Speech" : "Enable Text-to-Speech"}
+                >
+                    {autoRead ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                </button>
             </div>
 
             {/* Chat Area */}
@@ -131,14 +178,25 @@ _${data.wisdom}_
                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                             <div
-                                className={`max-w-[80%] p-4 rounded-xl ${msg.role === 'user'
+                                className={`max-w-[80%] p-4 rounded-xl relative group ${msg.role === 'user'
                                     ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-tr-none'
                                     : 'bg-gray-800 text-gray-200 border border-gray-700 rounded-tl-none'
                                     }`}
                             >
                                 <div className="whitespace-pre-wrap">{msg.content}</div>
-                                <div className="text-[10px] opacity-50 mt-1 text-right">
-                                    {msg.timestamp.toLocaleTimeString()}
+                                <div className="flex justify-between items-center mt-2">
+                                    {msg.role === 'assistant' && (
+                                        <button
+                                            onClick={() => handlePlayMessage(msg.content, idx)}
+                                            className={`p-1 rounded hover:bg-white/10 ${playingIdx === idx ? 'text-indigo-400' : 'text-gray-500 hover:text-gray-300'}`}
+                                            title={playingIdx === idx ? "Stop Reading" : "Read Aloud"}
+                                        >
+                                            {playingIdx === idx ? <Square size={14} fill="currentColor" /> : <Volume2 size={14} />}
+                                        </button>
+                                    )}
+                                    <div className="text-[10px] opacity-50 text-right flex-1">
+                                        {msg.timestamp.toLocaleTimeString()}
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
