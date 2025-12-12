@@ -56,7 +56,7 @@ export default function CalendarTab() {
                 title: newTaskTitle,
                 description: newTaskDesc,
                 status: 'todo',
-                dueDate: selectedDate.toLocaleDateString('en-CA') // Send YYYY-MM-DD
+                dueDate: `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`
             });
 
             setTasks(prev => [...prev, res.data]);
