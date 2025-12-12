@@ -15,8 +15,8 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
         console.log("WorkOS Login Config:", { clientId, redirectUri });
 
-        // Direct AuthKit Domain (more robust for AuthKit-only flows)
-        const workOsUrl = `https://zealous-monarch-72-staging.authkit.app/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        // Direct AuthKit Domain - Try root path if /authorize fails
+        const workOsUrl = `https://zealous-monarch-72-staging.authkit.app/?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         window.location.href = workOsUrl;
     };
 
