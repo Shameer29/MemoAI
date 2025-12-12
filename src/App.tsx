@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Brain, Layers, CheckSquare, Sparkles, FolderOpen, Menu, Calendar, FileText } from 'lucide-react';
 import AssistantTab from './components/AssistantTab';
@@ -9,7 +10,7 @@ import LabsTab from './components/LabsTab';
 import CalendarTab from './components/CalendarTab';
 import MeetingNotesTab from './components/MeetingNotesTab';
 import AuthScreen from './components/AuthScreen';
-import { clearUser } from './types';
+import { clearUser, API_BASE_URL } from './types';
 
 import DashboardTab from './components/DashboardTab';
 import Sidebar from './components/Sidebar'; // Import the new Sidebar
@@ -21,6 +22,32 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
+    // Check for WorkOS callback
+    const searchParams = new URLSearchParams(window.location.search);
+    const code = searchParams.get('code');
+
+    if (code) {
+      // Clean URL immediately
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      axios.post(`${API_BASE_URL}/auth/workos`, { code })
+        .then(res => {
+          const user = res.data;
+          if (user.id) {
+            localStorage.setItem('memoai_user_id', user.id);
+            localStorage.setItem('memoai_user_name', user.name);
+            localStorage.setItem('memoai_user_email', user.email);
+            setIsAuthenticated(true);
+            setCurrentUser({ id: user.id, name: user.name });
+          }
+        })
+        .catch(err => {
+          console.error("WorkOS Auth Failed", err);
+          alert("Authentication failed: " + (err.response?.data?.error || err.message));
+        });
+      return; // Skip existing session check if processing code
+    }
+
     // Check for existing session
     const userId = localStorage.getItem('memoai_user_id');
     const userName = localStorage.getItem('memoai_user_name');
