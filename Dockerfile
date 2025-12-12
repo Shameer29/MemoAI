@@ -1,27 +1,23 @@
-# Stage 1: Build the application
-FROM node:20-alpine AS builder
+# Stage 1: Build the application (use full Node, NOT Alpine)
+FROM node:20 AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy source code
 COPY . .
 
-# Build the application
+# Allow Node to use more RAM during build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 RUN npm run build
 
-# Stage 2: Serve the application with nginx
+# Stage 2: Serve with nginx
 FROM nginx:alpine
 
-# Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration (optional, for SPA routing)
 RUN echo 'server { \
     listen 80; \
     server_name localhost; \
@@ -32,9 +28,5 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
-# Expose port 80
 EXPOSE 80
-
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
-
