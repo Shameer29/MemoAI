@@ -56,7 +56,7 @@ export default function CalendarTab() {
                 title: newTaskTitle,
                 description: newTaskDesc,
                 status: 'todo',
-                dueDate: selectedDate.toISOString()
+                dueDate: selectedDate.toLocaleDateString('en-CA') // Send YYYY-MM-DD
             });
 
             setTasks(prev => [...prev, res.data]);
