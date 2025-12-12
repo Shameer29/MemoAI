@@ -14,7 +14,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
         const redirectUri = `${window.location.origin}/callback`;
 
         // Debug helper for the user
-        const confirmed = window.confirm(`Debug: Please verify this Redirect URI is in your WorkOS Dashboard:\n\n${redirectUri}\n\nProceed to WorkOS?`);
+        const confirmed = window.confirm(`Debug Config Verification:\n\nRedirect URI: ${redirectUri}\nClient ID: ${clientId}\n\nPlease verify BOTH match your WorkOS Dashboard.\n\nProceed to WorkOS?`);
         if (!confirmed) return;
 
         const workOsUrl = `https://api.workos.com/user_management/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
