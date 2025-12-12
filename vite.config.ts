@@ -13,8 +13,7 @@ export default defineConfig({
   },
 
   build: {
-    minify: false,       // ← prevents WebGPU shaders from breaking
-    treeshake: false,    // ← prevents Three.js constants from being removed
-    target: "esnext"
+    minify: false,      // ← REQUIRED for Three.js WebGPU
+    target: "esnext",   // ← avoids down-compilation issues
   }
 })
