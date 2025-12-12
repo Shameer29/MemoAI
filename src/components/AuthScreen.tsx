@@ -12,7 +12,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
     const handleWorkOSLogin = () => {
         const clientId = 'client_01KC9HMB985RBDZC0C6V4A13A4';
         const redirectUri = `${window.location.origin}/callback`;
-        const workOsUrl = `https://api.workos.com/sso/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        const workOsUrl = `https://api.workos.com/user_management/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         window.location.href = workOsUrl;
     };
 
