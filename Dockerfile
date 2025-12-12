@@ -13,20 +13,8 @@ FROM nginx:alpine
 # Copy build output
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Correct Nginx config
-COPY <<EOF /etc/nginx/conf.d/default.conf
-server {
-    listen 80;
-    server_name localhost;
-
-    root /usr/share/nginx/html;
-    index index.html;
-
-    location / {
-        try_files \$uri \$uri/ /index.html;
-    }
-}
-EOF
+# Copy nginx config
+COPY default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
