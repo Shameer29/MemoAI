@@ -13,11 +13,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
         const clientId = 'client_01KC9HMB985RBDZC0C6V4A13A4';
         const redirectUri = `${window.location.origin}/callback`;
 
-        // Debug helper for the user
-        const confirmed = window.confirm(`Debug Config Verification:\n\nRedirect URI: ${redirectUri}\nClient ID: ${clientId}\n\nPlease verify BOTH match your WorkOS Dashboard.\n\nProceed to WorkOS?`);
-        if (!confirmed) return;
+        console.log("WorkOS Login Config:", { clientId, redirectUri });
 
-        const workOsUrl = `https://api.workos.com/user_management/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        // Use the general SSO endpoint which handles both Enterprise and AuthKit flows
+        const workOsUrl = `https://api.workos.com/sso/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         window.location.href = workOsUrl;
     };
 
