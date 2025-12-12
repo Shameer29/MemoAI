@@ -60,13 +60,21 @@ export default function AssistantTab() {
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
-            recognition.continuous = false;
+            recognition.continuous = true; // Keep listening even if user pauses
             recognition.interimResults = false;
             recognition.lang = 'en-US';
 
             recognition.onresult = (event: any) => {
-                const transcript = event.results[0][0].transcript;
-                setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+                let newTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        newTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (newTranscript) {
+                    setInput((prev) => (prev ? `${prev} ${newTranscript}`.trim() : newTranscript.trim()));
+                }
             };
 
             recognition.onend = () => {
@@ -277,8 +285,8 @@ _${data.wisdom}_
                 <button
                     onClick={toggleVoiceInput}
                     className={`p-3 rounded-xl transition-all ${isListening
-                            ? 'bg-red-500 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]'
-                            : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
+                        ? 'bg-red-500 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]'
+                        : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
                         }`}
                     title={isListening ? "Stop Listening" : "Start Voice Input"}
                 >
