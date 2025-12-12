@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Sparkles, Volume2, VolumeX, Square } from 'lucide-react';
+import { Send, Sparkles, Volume2, VolumeX, Square, Mic, MicOff } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL, getUserId } from '../types';
 import type { ChatMessage } from '../types';
@@ -14,8 +14,10 @@ export default function AssistantTab() {
     const [isLoading, setIsLoading] = useState(false);
     const [autoRead, setAutoRead] = useState(false);
     const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+    const [isListening, setIsListening] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+    const recognitionRef = useRef<any>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -53,7 +55,51 @@ export default function AssistantTab() {
             }
         };
         loadHistory();
+
+        // Initialize Speech Recognition
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+            };
+
+            recognition.onend = () => {
+                setIsListening(false);
+            };
+
+            recognition.onerror = (event: any) => {
+                console.error('Speech recognition error', event.error);
+                setIsListening(false);
+            };
+
+            recognitionRef.current = recognition;
+        }
     }, []);
+
+    const toggleVoiceInput = () => {
+        if (!recognitionRef.current) {
+            alert('Voice input is not supported in this browser.');
+            return;
+        }
+
+        if (isListening) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+        } else {
+            try {
+                recognitionRef.current.start();
+                setIsListening(true);
+            } catch (err) {
+                console.error('Failed to start speech recognition', err);
+            }
+        }
+    };
 
     const handleSend = async () => {
         if (!input.trim()) return;
@@ -228,6 +274,16 @@ _${data.wisdom}_
                     placeholder="Ask me anything..."
                     className="flex-1 min-h-[50px] max-h-[150px] resize-none bg-transparent border-gray-700 focus:border-indigo-500"
                 />
+                <button
+                    onClick={toggleVoiceInput}
+                    className={`p-3 rounded-xl transition-all ${isListening
+                            ? 'bg-red-500 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]'
+                            : 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700'
+                        }`}
+                    title={isListening ? "Stop Listening" : "Start Voice Input"}
+                >
+                    {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                </button>
                 <button
                     onClick={handleSend}
                     disabled={isLoading || !input.trim()}
