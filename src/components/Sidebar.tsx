@@ -32,9 +32,7 @@ export default function Sidebar({
             >
                 {/* Logo Area */}
                 <div className="p-6 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/20">
-                        <span className="font-bold text-white text-lg">M</span>
-                    </div>
+                    <img src="/logo.png" alt="MemoAI" className="w-8 h-8 rounded-xl shrink-0 shadow-lg shadow-indigo-500/20" />
                     <span className="font-outfit font-bold text-xl tracking-tight text-white md:hidden lg:block">
                         Memo<span className="text-indigo-400">AI</span>
                     </span>

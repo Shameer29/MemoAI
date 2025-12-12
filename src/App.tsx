@@ -70,9 +70,7 @@ function App() {
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-bg-deep/80 backdrop-blur-md sticky top-0 z-30">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <span className="font-bold text-white">M</span>
-            </div>
+            <img src="/logo.png" alt="MemoAI" className="w-8 h-8 rounded-lg" />
             <span className="font-bold">MemoAI</span>
           </div>
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-gray-400">
