@@ -1,22 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// FIXED + CLEAN CONFIG
 export default defineConfig({
   plugins: [react()],
+
   optimizeDeps: {
-    exclude: ['three'],
+    exclude: ['three'], // VALID
   },
+
   build: {
-    commonjsOptions: {
-      exclude: ['three'],
-    },
+    minify: 'esbuild', // We are using esbuild, not terser
+
     rollupOptions: {
-      external: [],
+      // REMOVE invalid external: []
     },
-    minify: "esbuild",
-    terserOptions: {
-      mangle: false,
-      compress: false,
-    }
+
+    commonjsOptions: {
+      // REMOVE invalid exclude: ['three']
+    },
   }
 })
