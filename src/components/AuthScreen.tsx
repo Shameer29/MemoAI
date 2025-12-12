@@ -15,8 +15,8 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
         console.log("WorkOS Login Config:", { clientId, redirectUri });
 
-        // AuthKit (Hosted Login) requires the user_management endpoint
-        const workOsUrl = `https://api.workos.com/user_management/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+        // Direct AuthKit Domain (more robust for AuthKit-only flows)
+        const workOsUrl = `https://zealous-monarch-72-staging.authkit.app/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
         window.location.href = workOsUrl;
     };
 
